@@ -1,0 +1,147 @@
+.section {
+  margin-bottom: 2.4rem;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.card {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-soft-line);
+  border-radius: 14px;
+  padding: 1.3rem 1.4rem;
+  box-shadow: 5px 5px 0 0 var(--card-lift);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.description {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  max-width: 34ch;
+  line-height: 1.5;
+}
+
+.links {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.value {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.35em;
+}
+
+.digitGroup {
+  display: inline-block;
+}
+
+.label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.breakdown {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.6rem;
+}
+
+.breakdownItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.breakdownDivider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--accent-soft-line);
+}
+
+.breakdownValue {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  gap: 0.25em;
+}
+
+.breakdownLabel {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--accent-soft-line);
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  white-space: nowrap;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+.chip:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.chip svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip {
+    transition: none !important;
+  }
+}

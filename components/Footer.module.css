@@ -1,0 +1,7 @@
+.footer {
+  text-align: center;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.66rem;
+  color: var(--ink-faint);
+  margin-top: 3rem;
+}

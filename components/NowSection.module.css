@@ -1,0 +1,88 @@
+.section {
+  margin-bottom: 2.4rem;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.sectionNote {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.66rem;
+  color: var(--ink-faint);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.3rem 1.4rem;
+  box-shadow: 5px 5px 0 0 var(--card-lift);
+}
+
+.nowGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+}
+.heatmap div {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--accent);
+  cursor: default;
+  transition:
+    transform 0.12s ease,
+    outline-color 0.12s ease;
+  outline: 1px solid transparent;
+  outline-offset: 1px;
+}
+.heatmap div:hover {
+  transform: scale(1.25);
+  outline-color: var(--ink-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heatmap div {
+    transition: none !important;
+  }
+  .heatmap div:hover {
+    transform: none;
+  }
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.pills span {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  background: var(--surface-2);
+}
+
+@media (min-width: 860px) {
+  .nowGrid {
+    grid-template-columns: 1.3fr 1fr;
+    align-items: start;
+  }
+}
