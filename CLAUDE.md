@@ -28,6 +28,10 @@ GitHub's public repos API can only ever see public, language-tagged repos. Priva
 
 The avatar was originally a 3D `rotateY` flip card (photo front, QR back), matching the old static site. That looked wrong once a hard offset shadow was added under it (the shadow doesn't rotate with a 3D-transformed element, so it visually detached from the card mid-flip). Replaced with a crossfade + slight scale between the two faces — same click/keyboard-toggle interaction, no 3D transform, so the static shadow always sits correctly under it.
 
+## Favicon
+
+`app/icon.tsx` fetches `site.avatarUrl` at request time (revalidate 3600s, matching `REVALIDATE_SECONDS`) and streams it back as the site icon, so the browser tab favicon always matches the Hero avatar automatically — no separate icon file to keep in sync. `app/favicon.ico` still exists as the static legacy fallback; the two don't conflict, `icon.tsx` wins in browsers that support the `icon` file convention.
+
 ## Footer
 
 `Footer.tsx` renders `{site.name} · {year}` where `year` is `new Date().getFullYear()` — not stored in `content/site.ts`, so it never goes stale. There used to be a hardcoded `site.footer` string; removed in favor of this.
