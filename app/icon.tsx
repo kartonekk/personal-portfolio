@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { site } from "../content/site";
 
 export const size = {
@@ -5,13 +6,20 @@ export const size = {
   height: 32,
 };
 
+export const contentType = "image/png";
+
 export default async function Icon() {
   const res = await fetch(site.avatarUrl, {
     next: { revalidate: 3600 },
   });
-  return new Response(res.body, {
+  const source = await res.arrayBuffer();
+  const png = await sharp(Buffer.from(source))
+    .resize(size.width, size.height)
+    .png()
+    .toBuffer();
+  return new Response(new Uint8Array(png), {
     headers: {
-      "Content-Type": res.headers.get("content-type") ?? "image/jpeg",
+      "Content-Type": contentType,
     },
   });
 }

@@ -30,7 +30,7 @@ The avatar was originally a 3D `rotateY` flip card (photo front, QR back), match
 
 ## Favicon
 
-`app/icon.tsx` fetches `site.avatarUrl` at request time (revalidate 3600s, matching `REVALIDATE_SECONDS`) and streams it back as the site icon, so the browser tab favicon always matches the Hero avatar automatically — no separate icon file to keep in sync. `app/favicon.ico` still exists as the static legacy fallback; the two don't conflict, `icon.tsx` wins in browsers that support the `icon` file convention.
+`app/icon.tsx` fetches `site.avatarUrl` (revalidate 3600s, matching `REVALIDATE_SECONDS`), resizes it with `sharp` to a real 32x32 PNG, and serves that as the site icon — so the browser tab favicon always matches the Hero avatar automatically, no separate icon file to keep in sync. Declared metadata (`size`, `contentType`) must match the actual bytes returned: an earlier version proxied the raw fetched image untouched (source is a 640x640 JPEG) while still declaring `size: 32x32`/default PNG type, and browsers silently reject icons whose declared metadata doesn't match reality — no error, they just fall back to requesting `/favicon.ico` directly. `app/favicon.ico` still exists as the static legacy fallback; the two don't conflict, `icon.tsx` wins in browsers that support the `icon` file convention.
 
 ## Footer
 
