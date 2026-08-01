@@ -20,6 +20,19 @@
 
 The `github-contributions-api.jogruber.de` endpoint does **not** return one continuous ascending timeline. It returns whole calendar-year blocks ordered newest-year-first (all of 2026, then all of 2025, ... down to 2021), each block internally ascending. A naive `.slice(-days)` grabs the tail of the *oldest* block instead of the most recent days — this was a real bug (see git history), not just a display issue. `getActivity` sorts all entries by date, drops future-dated placeholder days, then takes the real last `days` entries.
 
+## `lib/data.ts` — `getCurseForgeDownloads`
+
+CurseForge has no public API without a key, and its own `/api/v1/*` endpoints are Cloudflare-blocked (403) for server-side fetches. So the member page is read through `r.jina.ai`, which renders it to markdown.
+
+The profile header total is **abbreviated** by CurseForge itself — it renders `1.0K Downloads`, not `1,038 Downloads`. The original regex was `/([\d,]+)\s*Downloads/i`, which cannot match across the `K`, so it returned `null` and the whole CurseForge stat silently vanished. Two things fixed that:
+
+- Primary path sums the **per-project** counts, which the member page prints unabbreviated (`605`, `369`, `64`). In the jina markdown each project block is `By[user](…/members/…)` followed by a bullet list whose first item is that project's download count — `CURSEFORGE_PROJECT_COUNT_RE` anchors on that pair. Exact, one HTTP request.
+- Fallback is the header total, now via `CURSEFORGE_TOTAL_RE`, which accepts a `K`/`M` suffix and a decimal point. Used only if the per-project regex matches nothing (i.e. jina's markdown shape changed).
+
+Both go through `parseAbbreviatedCount`, which strips commas and multiplies by the `K`/`M` factor.
+
+Rejected alternative: `api.cfwidget.com` returns exact per-project totals, but it indexes projects lazily and 404s indefinitely on recently-created ones (`/minecraft/mc-mods/tiny-players` still 404s), so it can't cover a full project list. Its author endpoints (`/author/kartonekk`, `/author/search/kartonekk`) don't work at all.
+
 ## `content/site.ts` — `now.knownStack`
 
 GitHub's public repos API can only ever see public, language-tagged repos. Private repos and non-GitHub work (e.g. Minecraft mod source published to Modrinth/CurseForge rather than GitHub) are structurally invisible to it — there's no way around that without exposing a personal access token client-side, which this app deliberately does not do. `now.knownStack` is where we declare facts that are true but that GitHub can't see; `lib/data.ts`'s `getStack()` merges this list with whatever real languages the live API call finds, de-duplicated.

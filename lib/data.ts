@@ -23,6 +23,23 @@ async function getModrinthDownloads(): Promise<number | null> {
   }
 }
 
+function parseAbbreviatedCount(raw: string, suffix?: string): number | null {
+  const n = parseFloat(raw.replace(/,/g, ""));
+  if (Number.isNaN(n)) return null;
+  const factor =
+    suffix?.toUpperCase() === "M"
+      ? 1_000_000
+      : suffix?.toUpperCase() === "K"
+        ? 1_000
+        : 1;
+  return Math.round(n * factor);
+}
+
+const CURSEFORGE_PROJECT_COUNT_RE =
+  /By\[[^\]]*\]\(https:\/\/www\.curseforge\.com\/members\/[^)]*\)\s*\n+\s*\*\s+([\d,]+(?:\.\d+)?)\s*([KM])?\s*\n/gi;
+
+const CURSEFORGE_TOTAL_RE = /([\d,]+(?:\.\d+)?)\s*([KM])?\s*Downloads/i;
+
 async function getCurseForgeDownloads(): Promise<number | null> {
   try {
     const res = await fetch(
@@ -31,9 +48,18 @@ async function getCurseForgeDownloads(): Promise<number | null> {
     );
     if (!res.ok) return null;
     const text = await res.text();
-    const match = text.match(/([\d,]+)\s*Downloads/i);
+
+    const perProject = [...text.matchAll(CURSEFORGE_PROJECT_COUNT_RE)]
+      .map((m) => parseAbbreviatedCount(m[1], m[2]))
+      .filter((n): n is number => n !== null);
+
+    if (perProject.length > 0) {
+      return perProject.reduce((sum, n) => sum + n, 0);
+    }
+
+    const match = text.match(CURSEFORGE_TOTAL_RE);
     if (!match) return null;
-    return parseInt(match[1].replace(/,/g, ""), 10);
+    return parseAbbreviatedCount(match[1], match[2]);
   } catch {
     return null;
   }
