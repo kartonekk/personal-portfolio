@@ -27,7 +27,7 @@ export const site = {
     title: "Currently",
     activityNote: "GitHub · last 30 days",
     workingWithLabel: "Working with",
-    knownStack: ["Java", "Minecraft Modding"] as string[],
+    knownStack: ["TypeScript", "CSS", "JavaScript", "HTML", "Python", "Node.js", "Google Script", "Unity", "C#", "Java", "Minecraft Modding"] as string[],
   },
 
   sideProjects: {

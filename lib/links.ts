@@ -20,4 +20,8 @@ export const profiles: string[] = [
   links.github,
   links.modrinth,
   links.curseforge,
+  "https://steamcommunity.com/id/kartonekk/",
+  "https://www.youtube.com/@kartonekk",
+  "https://x.com/k4rtonekk",
+  "https://open.spotify.com/user/316rujutupz5sl76bljer3fyvqdy?si=13c758bcc55f405e"
 ];
