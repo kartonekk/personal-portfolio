@@ -31,6 +31,7 @@ const TURN_TICKS = 6;
 const ACCEL_TICKS = 4;
 const JUMP_AT_TICK = 7;
 const JUMP_GAP_TICKS = 2;
+const PLAN_TICK_LIMIT = 600;
 const HEAD_YAW_CLAMP = 1.309;
 const HEAD_PITCH_CLAMP = Math.PI / 2;
 const START_BODY_YAW = 0.35;
@@ -83,6 +84,7 @@ type Sim = {
   boost: number;
   groundTicks: number;
   squash: number;
+  steppedThisTick: boolean;
 };
 
 type View = {
@@ -117,10 +119,66 @@ type Events = {
   onDust: (count: number, kind: DustKind) => void;
 };
 
-function playSound(sound: { src: string; volume: number }) {
-  const audio = new Audio(sound.src);
-  audio.volume = sound.volume;
-  return audio.play();
+type Sound = { src: string; volume: number };
+
+type Sfx = {
+  play: (sound: Sound, delaySeconds?: number) => void;
+  unlock: () => void;
+  dispose: () => void;
+};
+
+function createSfx(sounds: Sound[]): Sfx {
+  const Ctor =
+    window.AudioContext ??
+    (window as unknown as { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext;
+
+  if (!Ctor) {
+    return {
+      play: (sound, delaySeconds = 0) => {
+        window.setTimeout(() => {
+          const audio = new Audio(sound.src);
+          audio.volume = sound.volume;
+          audio.play().catch(() => {});
+        }, delaySeconds * 1000);
+      },
+      unlock: () => {},
+      dispose: () => {},
+    };
+  }
+
+  const context = new Ctor();
+  const buffers = new Map<string, AudioBuffer>();
+
+  for (const sound of sounds) {
+    fetch(sound.src)
+      .then((res) => res.arrayBuffer())
+      .then((raw) => context.decodeAudioData(raw))
+      .then((buffer) => buffers.set(sound.src, buffer))
+      .catch(() => {});
+  }
+
+  const resume = () => {
+    if (context.state !== "running") context.resume().catch(() => {});
+  };
+
+  return {
+    play: (sound, delaySeconds = 0) => {
+      resume();
+      const buffer = buffers.get(sound.src);
+      if (!buffer) return;
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      gain.gain.value = sound.volume;
+      source.connect(gain).connect(context.destination);
+      source.start(context.currentTime + delaySeconds);
+    },
+    unlock: resume,
+    dispose: () => {
+      context.close().catch(() => {});
+    },
+  };
 }
 
 function freshSim(startY: number): Sim {
@@ -148,12 +206,14 @@ function freshSim(startY: number): Sim {
     boost: 0,
     groundTicks: 0,
     squash: 0,
+    steppedThisTick: false,
   };
 }
 
 function stepSim(sim: Sim, events: Events) {
   sim.age += 1;
   sim.stageTicks += 1;
+  sim.steppedThisTick = false;
   if (sim.hurtTicks > 0) sim.hurtTicks -= 1;
   sim.squash *= SQUASH_DECAY;
 
@@ -273,6 +333,7 @@ function stepSim(sim: Sim, events: Events) {
       sim.moveDist += horizontal * 0.6;
       if (sim.moveDist > sim.nextStep) {
         sim.nextStep = Math.floor(sim.moveDist) + 1;
+        sim.steppedThisTick = true;
         events.onStep();
         events.onDust(2, "trail");
       }
@@ -285,6 +346,10 @@ function stepSim(sim: Sim, events: Events) {
   const target = Math.min(horizontal * 4, 1);
   sim.limbSwingAmount += (target - sim.limbSwingAmount) * 0.4;
   sim.limbSwing += sim.limbSwingAmount;
+}
+
+function stageOf(sim: Sim): Stage {
+  return sim.stage;
 }
 
 function snapshot(sim: Sim, into: View) {
@@ -356,6 +421,12 @@ export default function FallingPlayer() {
     let frame = 0;
     let viewer: SkinViewer | null = null;
     let detach = () => {};
+
+    const sfx = createSfx([FALL_SOUND, HURT_SOUND, STEP_SOUND]);
+    const unlock = () => sfx.unlock();
+    window.addEventListener("pointerdown", unlock);
+    window.addEventListener("keydown", unlock);
+    window.addEventListener("pointermove", unlock, { once: true });
 
     (async () => {
       const skinview3d = await import("skinview3d");
@@ -431,14 +502,35 @@ export default function FallingPlayer() {
       };
 
       const events: Events = {
-        onLand: () => {
-          playSound(FALL_SOUND).catch(() => {});
-          playSound(HURT_SOUND).catch(() => {});
-        },
-        onStep: () => {
-          playSound(STEP_SOUND).catch(() => {});
-        },
+        onLand: () => {},
+        onStep: () => {},
         onDust: spawnDust,
+      };
+
+      const silent: Events = { onLand: () => {}, onStep: () => {}, onDust: () => {} };
+
+      const scheduleAudio = () => {
+        const ghost = freshSim(startY);
+        ghost.stage = "fall";
+        ghost.vy = FALL_ENTRY_SPEED;
+
+        for (let tick = 0; tick < PLAN_TICK_LIMIT; tick += 1) {
+          const before = stageOf(ghost);
+          const groundedBefore = ghost.y <= 0 && ghost.vy <= 0;
+          stepSim(ghost, silent);
+          const after = stageOf(ghost);
+          const grounded = ghost.y <= 0 && ghost.vy <= 0;
+          const delay = tick * (TICK_MS / 1000);
+
+          if (before === "fall" && after === "hurt") {
+            sfx.play(FALL_SOUND, delay);
+            sfx.play(HURT_SOUND, delay);
+          } else if (after === "run" && ((!groundedBefore && grounded) || ghost.steppedThisTick)) {
+            sfx.play(STEP_SOUND, delay);
+          }
+
+          if (after === "run" && ghost.x * blockPx > window.innerWidth) break;
+        }
       };
 
       const trigger = () => {
@@ -447,6 +539,7 @@ export default function FallingPlayer() {
         sim.stage = "fall";
         sim.vy = FALL_ENTRY_SPEED;
         snapshot(sim, prev);
+        scheduleAudio();
       };
 
       const triggers = Array.from(document.querySelectorAll(TRIGGER_SELECTOR));
@@ -496,7 +589,11 @@ export default function FallingPlayer() {
     return () => {
       disposed = true;
       detach();
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("pointermove", unlock);
       cancelAnimationFrame(frame);
+      sfx.dispose();
       viewer?.dispose();
     };
   }, []);

@@ -108,7 +108,15 @@ Screen-space movement is applied as a `translate3d` on the `.rig` wrapper from t
 
 `SkinViewer` runs with `renderPaused: true`, driven from our own `requestAnimationFrame` loop.
 
-**Audio.** Browsers refuse `Audio.play()` until the user has interacted with the page, and **hover is not an interaction** for that policy — so if the visitor hovers the trigger before clicking anything, the animation plays silently. Every `play()` is `.catch()`-ed, so that (and any missing file) degrades to silence rather than throwing.
+**Audio.** Playback goes through one `AudioContext` (`createSfx`), not `new Audio()` per sound. The three files are fetched and `decodeAudioData`-ed once at mount, then each hit plays a fresh `BufferSource` through a gain node — no per-play decode hitch, and overlapping sounds work (fall + hurt fire on the same tick).
+
+**The whole soundtrack is scheduled up front, not played from the animation.** On trigger, `scheduleAudio` runs a throwaway copy of the sim (`ghost`, fed a no-op `Events`) forward to the end and calls `sfx.play(sound, delay)` for every event it finds, where `delay` is `tick * TICK_MS / 1000`. Those become `source.start(currentTime + delay)` on the audio clock. The reason is alt-tab: `requestAnimationFrame` stops in a hidden tab, so an animation-driven sound would simply never fire, but the audio clock keeps running and pre-scheduled sources play on time regardless — the same reason a backgrounded video keeps its audio. `events.onLand`/`onStep` are therefore empty; only dust is driven from the live sim (particles in a hidden tab would be pointless anyway).
+
+This is only sound because the sim is **deterministic** — no input, no randomness outside the dust jitter — so the ghost run and the visible run produce identical timings. Anything that makes the animation depend on live state (cursor position, viewport resize mid-run, a random jump interval) breaks that equivalence and the audio would drift out of sync. A typical run schedules 5 events over ~5.7s. `PLAN_TICK_LIMIT` caps the ghost loop so a bug can never spin it forever.
+
+`stageOf()` exists for a TypeScript reason: after `ghost.stage = "fall"`, TS narrows the property to that literal and keeps the narrowing across the `stepSim` call, so `ghost.stage === "hurt"` is rejected as a non-overlapping comparison. Reading it through a function typed to return `Stage` restores the full union.
+
+Browsers still refuse to start an audio context until the user has interacted with the page, and **hover is not an interaction** for that policy. The context is resumed from `pointerdown`, `keydown`, and the first `pointermove` anywhere on the page, and every `play()` calls `resume()` first, so a still-locked context recovers at the next gesture rather than staying dead. A visitor who hovers with no prior interaction gets the animation silently; a missing or undecodable file degrades the same way. A browser with no `AudioContext` falls back to `Audio` elements with `setTimeout` for the delay.
 
 **Assets.**
 
