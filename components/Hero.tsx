@@ -63,9 +63,7 @@ export default function Hero() {
       </div>
 
       <div className={styles.heroText}>
-        <p className={styles.eyebrow}>
-          {site.name} &middot; {site.availability}
-        </p>
+        <p className={styles.eyebrow}>{site.availability}</p>
         <h1 className={styles.headline}>
           <span className={styles.accentWord}>{site.headline.lead}</span>
         </h1>

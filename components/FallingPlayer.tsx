@@ -456,6 +456,8 @@ export default function FallingPlayer() {
       let last = performance.now();
       let hurtShown = -1;
 
+      const exitDistance = () => window.innerWidth + CANVAS.width;
+
       const footPoint = active.camera.position.clone();
 
       footPoint.set(0, FEET_UNITS, 0).project(active.camera);
@@ -529,7 +531,7 @@ export default function FallingPlayer() {
             sfx.play(STEP_SOUND, delay);
           }
 
-          if (after === "run" && ghost.x * blockPx > window.innerWidth) break;
+          if (after === "run" && ghost.x * blockPx > exitDistance()) break;
         }
       };
 
@@ -557,7 +559,7 @@ export default function FallingPlayer() {
           carry -= TICK_MS;
           snapshot(sim, prev);
           if (sim.stage !== "idle") stepSim(sim, events);
-          if (sim.stage === "run" && sim.x * blockPx > window.innerWidth) {
+          if (sim.stage === "run" && sim.x * blockPx > exitDistance()) {
             sim = freshSim(startY);
             snapshot(sim, prev);
           }

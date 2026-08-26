@@ -3,8 +3,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 1.1rem;
-  margin-bottom: 3rem;
+  gap: 1.15rem;
+  margin-bottom: 3.2rem;
 }
 
 .avatarWrap {
@@ -68,7 +68,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.85rem;
 }
 
 .eyebrow {
@@ -89,10 +89,10 @@
 .headline {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   font-weight: 900;
-  font-size: clamp(1.9rem, 6.5vw, 2.6rem);
-  line-height: 1.12;
-  letter-spacing: -0.01em;
-  max-width: 30ch;
+  font-size: clamp(2.5rem, 10vw, 3.7rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  max-width: 16ch;
   margin: 0;
   text-shadow:
     1px 1px 0 var(--line),

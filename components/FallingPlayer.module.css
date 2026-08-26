@@ -9,7 +9,7 @@
 .rig {
   position: absolute;
   bottom: -3.9rem;
-  right: clamp(1rem, 6vw, 5rem);
+  left: clamp(0.5rem, 3vw, 2.5rem);
   visibility: hidden;
   will-change: transform;
 }
