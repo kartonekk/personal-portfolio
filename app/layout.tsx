@@ -24,20 +24,20 @@ const spaceMono = Space_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: `${site.name} — ${site.seo.jobTitle}`,
+  title: `${site.name} - ${site.seo.jobTitle}`,
   description: site.subhead,
   alternates: { canonical: "/" },
   openGraph: {
     type: "profile",
     url: siteUrl,
     siteName: site.name,
-    title: `${site.name} — ${site.seo.jobTitle}`,
+    title: `${site.name} - ${site.seo.jobTitle}`,
     description: site.subhead,
     images: [site.avatarUrl],
   },
   twitter: {
     card: "summary",
-    title: `${site.name} — ${site.seo.jobTitle}`,
+    title: `${site.name} - ${site.seo.jobTitle}`,
     description: site.subhead,
     images: [site.avatarUrl],
   },
