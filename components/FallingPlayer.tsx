@@ -6,6 +6,9 @@ import styles from "./FallingPlayer.module.css";
 
 const SKIN_SRC = "/skin.png";
 const TRIGGER_SELECTOR = "[data-mc-trigger]";
+const DESKTOP_QUERY = "(min-width: 860px)";
+const HOVER_QUERY = "(hover: hover) and (pointer: fine)";
+const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const FALL_SOUND = { src: "/sounds/fall.ogg", volume: 0.85 };
 const HURT_SOUND = { src: "/sounds/hurt.ogg", volume: 1 };
 const STEP_SOUND = { src: "/sounds/step.ogg", volume: 0.5 };
@@ -51,6 +54,14 @@ const LOOK_TARGETS = [
 
 function normalizeAngle(radians: number) {
   return ((radians + Math.PI) % (Math.PI * 2)) - Math.PI;
+}
+
+function isSupported() {
+  return (
+    window.matchMedia(DESKTOP_QUERY).matches &&
+    window.matchMedia(HOVER_QUERY).matches &&
+    !window.matchMedia(MOTION_QUERY).matches
+  );
 }
 
 function smooth(t: number) {
@@ -417,6 +428,8 @@ export default function FallingPlayer() {
   const stageRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    if (!isSupported()) return;
+
     let disposed = false;
     let frame = 0;
     let viewer: SkinViewer | null = null;
