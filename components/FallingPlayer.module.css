@@ -1,0 +1,54 @@
+.stage {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.rig {
+  position: absolute;
+  bottom: -3.9rem;
+  right: clamp(1rem, 6vw, 5rem);
+  visibility: hidden;
+  will-change: transform;
+}
+
+.dust {
+  position: fixed;
+  width: 3px;
+  height: 3px;
+  opacity: 0.8;
+  animation-name: dust;
+  animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  animation-fill-mode: forwards;
+}
+
+@keyframes dust {
+  from {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate3d(var(--dx), var(--dy), 0);
+    opacity: 0;
+  }
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 859px) {
+  .stage {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    display: none;
+  }
+}

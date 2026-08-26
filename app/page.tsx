@@ -5,6 +5,7 @@ import ContactSection from "../components/ContactSection";
 import SharePanel from "../components/SharePanel";
 import Footer from "../components/Footer";
 import JsonLd from "../components/JsonLd";
+import FallingPlayer from "../components/FallingPlayer";
 import { getActivity, getDownloads, getStack } from "../lib/data";
 import styles from "./page.module.css";
 
@@ -24,6 +25,7 @@ export default async function Home() {
       <ContactSection />
       <SharePanel />
       <Footer />
+      <FallingPlayer />
     </div>
   );
 }

@@ -52,7 +52,7 @@ export default function SideProjects({
       <div className={styles.sectionHead}>
         <p className={styles.sectionTitle}>{site.sideProjects.title}</p>
       </div>
-      <div className={styles.card}>
+      <div className={styles.card} data-mc-trigger="">
         <div className={styles.top}>
           <div className={styles.left}>
             <p className={styles.description}>{site.sideProjects.description}</p>
