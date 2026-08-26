@@ -6,11 +6,16 @@ export const site = {
     "https://i.pinimg.com/control1/736x/c8/71/e7/c871e738b34c227f0a062d411e93836b.jpg",
 
   headline: {
-    lead: "Kartonek",
+    lead: "Kartonekk",
   },
 
   subhead:
-    "I build web applications. Outside of work, I develop open-source Minecraft mods.",
+    "Full Stack Developer... Sometimes mods.",
+
+  seo: {
+    jobTitle: "Full-Stack Developer",
+    alternateNames: ["Kartonekk", "kartonekk"] as string[],
+  },
 
   cta: {
     github: "GitHub",

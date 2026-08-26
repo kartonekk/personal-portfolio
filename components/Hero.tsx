@@ -67,10 +67,7 @@ export default function Hero() {
           {site.name} &middot; {site.availability}
         </p>
         <h1 className={styles.headline}>
-          {site.headline.lead}
-          <br />
-          <span className={styles.accentWord}>{site.headline.accent}</span>{" "}
-          {site.headline.tail}
+          <span className={styles.accentWord}>{site.headline.lead}</span>
         </h1>
         <p className={styles.sub}>{site.subhead}</p>
         <div className={styles.ctaRow}>

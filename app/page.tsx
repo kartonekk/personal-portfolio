@@ -4,6 +4,7 @@ import SideProjects from "../components/SideProjects";
 import ContactSection from "../components/ContactSection";
 import SharePanel from "../components/SharePanel";
 import Footer from "../components/Footer";
+import JsonLd from "../components/JsonLd";
 import { getActivity, getDownloads, getStack } from "../lib/data";
 import styles from "./page.module.css";
 
@@ -16,6 +17,7 @@ export default async function Home() {
 
   return (
     <div className={styles.page}>
+      <JsonLd />
       <Hero />
       <NowSection activity={activity} stack={stack} />
       <SideProjects downloads={downloads} />

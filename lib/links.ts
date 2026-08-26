@@ -1,3 +1,5 @@
+export const siteUrl = "https://link.karton.dev";
+
 export const links = {
   github: "https://github.com/kartonekk",
   discord: "https://discord.com/users/kartonekk",
@@ -13,3 +15,9 @@ export const usernames = {
   modrinth: "Kartonek",
   curseforge: "kartonekk",
 } as const;
+
+export const profiles: string[] = [
+  links.github,
+  links.modrinth,
+  links.curseforge,
+];

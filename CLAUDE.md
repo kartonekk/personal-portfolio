@@ -11,7 +11,8 @@
 ## Structure
 
 - `content/site.ts` — every piece of copy on the page (name, availability, headline, subhead, button labels, section titles, "Working with" label, share-panel text). Edit text here, not in components. Exception: the footer year (see Footer below).
-- `lib/links.ts` — functional endpoints: real URLs and the usernames used for API calls. Kept separate from `content/site.ts` so editing display copy can never accidentally break a link or an API call.
+- `lib/links.ts` — functional endpoints: real URLs and the usernames used for API calls, plus `siteUrl` (canonical origin of this site) and `profiles` (the list fed to the structured-data `sameAs`). Kept separate from `content/site.ts` so editing display copy can never accidentally break a link or an API call.
+- `lib/schema.ts` — builds the JSON-LD (`Person` + `WebSite`) from `content/site.ts` and `lib/links.ts`. No literals of its own.
 - `lib/data.ts` — server-side data fetching only (Modrinth, CurseForge, GitHub contributions, GitHub languages). Runs in Server Components, so none of it is subject to browser CORS. Each fetch revalidates hourly (`REVALIDATE_SECONDS`).
 - `lib/format.ts` — `groupDigits(n)` splits a number into groups of 3 from the right (e.g. `1234567 -> ["1", "234", "567"]`) so the UI can render each group as its own span with a gap between them, instead of a plain comma-formatted string.
 - `components/` — one `.tsx` + matching `.module.css` per section. Only `Hero.tsx` and `SharePanel.tsx` are client components (`"use client"`) — the avatar crossfade and the expandable-QR modal both need `useState`. Everything else is a plain server component.
@@ -52,3 +53,24 @@ The avatar was originally a 3D `rotateY` flip card (photo front, QR back), match
 ## Heatmap tooltips
 
 Each activity-heatmap cell has a native `title` attribute with the real date and contribution count (e.g. "Jul 28, 2026: 3 contributions"), backed by `ActivityDay[]` from `getActivity` (date + count, not just count). Plain native tooltip, no custom JS — kept simple since a browser tooltip was enough to satisfy the ask.
+
+## `content/site.ts` — `headline`
+
+`headline` is a single field, `lead`. It used to be a three-part line (`lead` + colored `accent` word + `tail`, e.g. "Full-stack developer, / **modder** after hours."); the copy was collapsed to just the name, but `Hero.tsx` still read `headline.accent` and `headline.tail`, which no longer existed — so the `<h1>` rendered the name followed by a stray `<br />` and an empty accent span. `Hero.tsx` now renders `headline.lead` alone, wrapped in `.accentWord` so the display face keeps the accent color. Adding a second line back means adding both the field here and the markup there.
+
+## Structured data / SEO
+
+Search engines get three things, all generated from the existing content files — nothing is hardcoded twice:
+
+- `components/JsonLd.tsx` renders one `<script type="application/ld+json">` (rendered from `app/page.tsx`, per the Next 16 JSON-LD guide in `node_modules/next/dist/docs/01-app/02-guides/json-ld.md`). It emits an array of two nodes: a `Person` (`@id` `{siteUrl}/#person`) and a `WebSite` whose `publisher` points back at that `@id`, so the two are linked rather than floating separately. `serializeJsonLd` escapes `<` as `<` — required, since the payload goes through `dangerouslySetInnerHTML`.
+- `app/layout.tsx` sets `metadataBase`, `alternates.canonical: "/"`, and OpenGraph/Twitter cards.
+- `app/robots.ts` and `app/sitemap.ts` are the Next file conventions; both read `siteUrl`.
+
+To change what the schema claims:
+
+- **Which profiles are "the same person"** — `profiles` in `lib/links.ts`. Only list pages you control that link back to `siteUrl`; a one-way `sameAs` is ignored, and listing someone else's profile is worse than listing none. Discord and Signal are deliberately absent — neither is a crawlable profile page.
+- **Names** — `site.name` is canonical; `site.seo.alternateNames` declares the other spellings (e.g. `Kartonekk`) as the same entity. `getPersonSchema` drops any entry equal to `site.name`, and emits a bare string instead of an array when only one survives.
+- **Job title** — `site.seo.jobTitle`, also reused in the page `<title>` and OG title.
+- **Canonical URL** — `siteUrl` in `lib/links.ts`. It must be the real address this page is served from; it feeds the schema `url`/`@id`, the canonical link, `sitemap.xml`, and `robots.txt`.
+
+`knowsAbout` reuses `site.now.knownStack`, and `description` reuses `site.subhead`, so schema text can't drift from visible page text — which matters, since structured data that doesn't match visible content gets discounted.
